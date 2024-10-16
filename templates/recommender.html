@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Recommender</title>
+  </head>
+  <body>
+    <h1>Get Book Suggestions</h1>
+    <form id="suggestions-form">
+      <label for="query">Enter your query:</label>
+      <input
+        type="text"
+        id="query"
+        name="query"
+        placeholder="E.g., Recommend books similar to Harry Potter"
+        required
+      />
+      <br /><br />
+      <button type="submit">Suggerimenti</button>
+    </form>
+
+    <!-- Section to display recommendation results -->
+    <h2>Recommendation Results</h2>
+    <div id="recommendation-result"></div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const suggestionsForm = document.getElementById("suggestions-form");
+
+        suggestionsForm.addEventListener("submit", function (event) {
+          event.preventDefault(); // Prevent default form submission
+
+          const query = document.getElementById("query").value;
+
+          // Make a POST request to the backend with the user's query
+          fetch("/get_recommendations", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ query: query }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              // Display the recommendation result
+              document.getElementById("recommendation-result").innerText =
+                data.recommendation;
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
+        });
+      });
+    </script>
+  </body>
+</html>

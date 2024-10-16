@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Store Inventory</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        padding: 0;
+        background-color: #f4f4f4;
+      }
+
+      h1 {
+        text-align: center;
+      }
+
+      h2 {
+        margin-top: 40px;
+      }
+
+      form {
+        margin-bottom: 20px;
+      }
+
+      label {
+        font-weight: bold;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      table,
+      th,
+      td {
+        border: 1px solid #ddd;
+      }
+
+      th,
+      td {
+        padding: 12px;
+        text-align: left;
+      }
+
+      th {
+        background-color: #f2f2f2;
+      }
+
+      button {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        padding: 10px;
+        cursor: pointer;
+      }
+
+      button.delete {
+        background-color: #e74c3c;
+      }
+
+      button.edit {
+        background-color: #f39c12;
+      }
+
+      #edit-book-form {
+        display: none;
+      }
+
+      .logout-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background-color: #e74c3c;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Book Store Inventory</h1>
+
+    <!-- Logout Button -->
+    <button class="logout-btn" onclick="window.location.href='/logout';">
+      Logout
+    </button>
+
+    <!-- Add Recommender Button to redirect to the new recommender page -->
+    <button
+      class="suggerimenti-btn"
+      onclick="window.location.href='/recommender';"
+    >
+      Recommender
+    </button>
+
+    <h2>Add a New Book</h2>
+    <form id="add-book-form">
+      <label for="title">Title:</label>
+      <input type="text" id="title" name="title" required /><br /><br />
+
+      <label for="author">Author:</label>
+      <input type="text" id="author" name="author" required /><br /><br />
+
+      <label for="year_published">Year Published:</label>
+      <input
+        type="number"
+        id="year_published"
+        name="year_published"
+        required
+      /><br /><br />
+
+      <label for="price">Price:</label>
+      <input
+        type="number"
+        step="0.01"
+        id="price"
+        name="price"
+        required
+      /><br /><br />
+
+      <button type="submit">Add Book</button>
+    </form>
+
+    <h2>Edit Book</h2>
+    <form id="edit-book-form">
+      <input type="hidden" id="edit-book-id" name="id" />
+
+      <label for="edit-title">Title:</label>
+      <input type="text" id="edit-title" name="title" required /><br /><br />
+
+      <label for="edit-author">Author:</label>
+      <input type="text" id="edit-author" name="author" required /><br /><br />
+
+      <label for="edit-year_published">Year Published:</label>
+      <input
+        type="number"
+        id="edit-year_published"
+        name="year_published"
+        required
+      /><br /><br />
+
+      <label for="edit-price">Price:</label>
+      <input
+        type="number"
+        step="0.01"
+        id="edit-price"
+        name="price"
+        required
+      /><br /><br />
+
+      <button type="submit">Update Book</button>
+    </form>
+
+    <h2>Advanced Filters</h2>
+    <form id="filter-form">
+      <label for="year-min">Year Published (from):</label>
+      <input
+        type="number"
+        id="year-min"
+        name="year_min"
+        placeholder="Min Year"
+      />
+
+      <label for="year-max">Year Published (to):</label>
+      <input
+        type="number"
+        id="year-max"
+        name="year_max"
+        placeholder="Max Year"
+      /><br /><br />
+
+      <label for="price-min">Price (from):</label>
+      <input
+        type="number"
+        id="price-min"
+        name="price_min"
+        placeholder="Min Price"
+        step="0.01"
+      />
+
+      <label for="price-max">Price (to):</label>
+      <input
+        type="number"
+        id="price-max"
+        name="price_max"
+        placeholder="Max Price"
+        step="0.01"
+      /><br /><br />
+
+      <button type="button" onclick="applyFilters()">Apply Filters</button>
+      <button type="button" onclick="resetFilters()">Reset Filters</button>
+    </form>
+
+    <h2>Search Books</h2>
+    <input
+      type="text"
+      id="search-query"
+      placeholder="Search by title or author"
+      oninput="searchBooks()"
+    />
+
+    <table id="books-table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Author</th>
+          <th>Year Published</th>
+          <th>Price</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="books-list">
+        {% for book in books %}
+        <tr id="book-row-{{ book.id }}">
+          <td>{{ book.title }}</td>
+          <td>{{ book.author }}</td>
+          <td>{{ book.year_published }}</td>
+          <td>{{ book.price }}</td>
+          <td>
+            <!-- Add buttons for edit and delete actions -->
+            <button
+              class="edit"
+              onclick="editBook({{ book.id }}, '{{ book.title }}', '{{ book.author }}', {{ book.year_published }}, {{ book.price }})"
+            >
+              Edit
+            </button>
+            <button class="delete" onclick="deleteBook({{ book.id }})">
+              Delete
+            </button>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="5">No books found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

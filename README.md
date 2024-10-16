@@ -1,0 +1,1 @@
+psql -U vincenzo -d book_store
