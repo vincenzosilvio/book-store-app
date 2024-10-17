@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ book.title }} - Details</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background-color: #f4f4f4;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        text-align: center;
+      }
+
+      .book-info {
+        margin-top: 20px;
+      }
+
+      .book-info label {
+        font-weight: bold;
+      }
+
+      .description {
+        margin-top: 20px;
+      }
+
+      .back-btn {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+      }
+
+      .back-btn:hover {
+        background-color: #45a049;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>{{ book.title }}</h1>
+
+      <div class="book-info">
+        <p><label>Author:</label> {{ book.author }}</p>
+        <p><label>Year Published:</label> {{ book.year_published }}</p>
+        <p><label>Price:</label> €{{ book.price }}</p>
+      </div>
+
+      <div class="description">
+        <h2>Description</h2>
+        <p id="description">Loading description...</p>
+      </div>
+
+      <!-- Correctly embed the book ID in JavaScript -->
+      <script>
+        document.addEventListener("DOMContentLoaded", function() {
+          const bookId = {{ book.id|tojson }};
+          fetch(`/fetch_description/${bookId}`)
+            .then(response => response.json())
+            .then(data => {
+              document.getElementById("description").textContent = data.description;
+            })
+            .catch(error => {
+              console.error("Error fetching description:", error);
+              document.getElementById("description").textContent = "Description not available.";
+            });
+        });
+      </script>
+
+      <a href="/" class="back-btn">Back to Book List</a>
+    </div>
+  </body>
+</html>

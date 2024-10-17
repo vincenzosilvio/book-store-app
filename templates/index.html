@@ -53,6 +53,7 @@
 
       th {
         background-color: #f2f2f2;
+        cursor: pointer; /* This makes the cursor a pointer when hovering over headers */
       }
 
       button {
@@ -212,38 +213,15 @@
     <table id="books-table">
       <thead>
         <tr>
-          <th>Title</th>
-          <th>Author</th>
-          <th>Year Published</th>
-          <th>Price</th>
+          <th onclick="sortBooks('title')">Title</th>
+          <th onclick="sortBooks('author')">Author</th>
+          <th onclick="sortBooks('year_published')">Year Published</th>
+          <th onclick="sortBooks('price')">Price</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody id="books-list">
-        {% for book in books %}
-        <tr id="book-row-{{ book.id }}">
-          <td>{{ book.title }}</td>
-          <td>{{ book.author }}</td>
-          <td>{{ book.year_published }}</td>
-          <td>{{ book.price }}</td>
-          <td>
-            <!-- Add buttons for edit and delete actions -->
-            <button
-              class="edit"
-              onclick="editBook({{ book.id }}, '{{ book.title }}', '{{ book.author }}', {{ book.year_published }}, {{ book.price }})"
-            >
-              Edit
-            </button>
-            <button class="delete" onclick="deleteBook({{ book.id }})">
-              Delete
-            </button>
-          </td>
-        </tr>
-        {% else %}
-        <tr>
-          <td colspan="5">No books found.</td>
-        </tr>
-        {% endfor %}
+        <!-- Dynamically loaded content -->
       </tbody>
     </table>
 

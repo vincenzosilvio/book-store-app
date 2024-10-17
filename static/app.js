@@ -122,7 +122,7 @@ function fetchBooks(queryString = "") {
       data.forEach((book) => {
         booksList.innerHTML += `
             <tr>
-              <td>${book.title}</td>
+              <td><a href="/book/${book.id}">${book.title}</a></td>
               <td>${book.author}</td>
               <td>${book.year_published}</td>
               <td>${book.price}</td>
@@ -138,6 +138,7 @@ function fetchBooks(queryString = "") {
       console.error("Error:", error);
     });
 }
+
 
 // Delete a book by ID
 function deleteBook(id) {
@@ -198,32 +199,48 @@ function searchBooks() {
 let currentSortField = "";
 let currentSortDirection = "asc";
 
-// Funzione per ordinare i libri
 function sortBooks(field) {
-  // Inverti la direzione dell'ordinamento se stai riordinando per lo stesso campo
+  // Invert the sort direction if sorting by the same field
   if (currentSortField === field) {
     currentSortDirection = currentSortDirection === "asc" ? "desc" : "asc";
   } else {
     currentSortField = field;
-    currentSortDirection = "asc";
+    currentSortDirection = "asc"; // Default to ascending when a new field is selected
   }
 
-  fetch("/books")
+  // Make a GET request with the sorting query parameters
+  const queryString = new URLSearchParams({
+    sort_field: currentSortField,
+    sort_direction: currentSortDirection,
+  });
+
+  fetch(`/books?${queryString}`)
     .then((response) => response.json())
     .then((data) => {
-      let sortedBooks = data.sort((a, b) => {
-        let comparison = 0;
-        if (a[field] > b[field]) {
-          comparison = 1;
-        } else if (a[field] < b[field]) {
-          comparison = -1;
-        }
-        return currentSortDirection === "asc" ? comparison : -comparison;
-      });
+      const booksList = document.getElementById("books-list");
+      booksList.innerHTML = ""; // Clear the list
 
-      displayBooks(sortedBooks); // Aggiorna la tabella con i libri ordinati
+      // Add the sorted books to the HTML table body
+      data.forEach((book) => {
+        booksList.innerHTML += `
+          <tr>
+            <td>${book.title}</td>
+            <td>${book.author}</td>
+            <td>${book.year_published}</td>
+            <td>${book.price}</td>
+            <td>
+              <button class="delete" onclick="deleteBook(${book.id})">Delete</button>
+              <button class="edit" onclick="editBook(${book.id}, '${book.title}', '${book.author}', ${book.year_published}, ${book.price})">Edit</button>
+            </td>
+          </tr>
+        `;
+      });
+    })
+    .catch((error) => {
+      console.error("Error:", error);
     });
 }
+
 
 // Function to apply filters
 function applyFilters() {

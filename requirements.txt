@@ -11,3 +11,4 @@ langchain_openai
 faiss-cpu
 black
 pylint
+openai

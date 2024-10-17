@@ -13,6 +13,7 @@ from flask_login import (
 )
 
 import rag
+import get_bookDescription
 
 
 app = Flask(__name__)
@@ -62,6 +63,27 @@ class Book(db.Model):
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+
+@app.route("/book/<int:book_id>", methods=["GET"])
+@login_required
+def book_details(book_id):
+    """Fetch and display the details of a specific book."""
+    book = Book.query.get_or_404(book_id)  # Get the book or return a 404 if not found
+    description = get_bookDescription.fetch_book_description(book.title, book.author)  # Fetch description
+    return render_template("book_details.html", book=book, description=description)
+
+@app.route("/fetch_description/<int:book_id>", methods=["GET"])
+@login_required
+def fetch_description(book_id):
+    # Fetch the book from the database
+    book = Book.query.get_or_404(book_id)  # This will 404 if the book_id is invalid
+
+    # Fetch the description from the LLM using the function
+    description = get_bookDescription.fetch_book_description(book.title, book.author)
+
+    # Return the description in a JSON response
+    return jsonify({"description": description})
 
 
 # Route per la registrazione
@@ -150,16 +172,21 @@ def add_book():
         return jsonify({"message": f"Database Error: {str(e)}"}), 500
 
 
+# Route per ottenere tutti i libri con filtraggio e ordinamento opzionali
 @app.route("/books", methods=["GET"])
 @login_required
 def get_books():
-    """Get all books for the current user with optional filtering."""
+    """Get all books for the current user with optional filtering and sorting."""
     try:
         # Get filter values from query parameters
         price_min = request.args.get("price_min", type=float)
         price_max = request.args.get("price_max", type=float)
         year_min = request.args.get("year_min", type=int)
         year_max = request.args.get("year_max", type=int)
+
+        # Get sorting parameters
+        sort_field = request.args.get("sort_field", default="id", type=str)
+        sort_direction = request.args.get("sort_direction", default="asc", type=str)
 
         # Start with all books for the current user
         books_query = Book.query.filter_by(user_id=current_user.id)
@@ -176,7 +203,14 @@ def get_books():
         if year_max is not None:
             books_query = books_query.filter(Book.year_published <= year_max)
 
-        # Execute the filtered query and retrieve the books
+        # Apply sorting
+        if sort_field in ["title", "author", "year_published", "price"]:
+            if sort_direction == "asc":
+                books_query = books_query.order_by(getattr(Book, sort_field).asc())
+            else:
+                books_query = books_query.order_by(getattr(Book, sort_field).desc())
+
+        # Execute the query and retrieve the books
         books = books_query.all()
 
         # Format books into a list of dictionaries
@@ -195,6 +229,7 @@ def get_books():
 
     except SQLAlchemyError as e:
         return jsonify({"message": f"Database Error: {str(e)}"}), 500
+
 
 
 # Route per modificare un libro esistente
@@ -246,11 +281,13 @@ def delete_book(book_id):
         db.session.rollback()
         return jsonify({"message": f"Database Error: {str(e)}"}), 500
 
+
 # Route for get recommdender.html
 @app.route("/recommender", methods=["GET"])
 @login_required
 def recommender_page():
     return render_template("recommender.html")
+
 
 # Route for recommendations
 @app.route("/recommender", methods=["POST"])
@@ -273,6 +310,7 @@ def recommender():
     except Exception as e:
         print("Error during recommendation:", str(e))
         return jsonify({"message": "Error occurred during recommendation"}), 500
+
 
 @app.route("/get_recommendations", methods=["POST"])
 @login_required
