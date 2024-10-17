@@ -4,36 +4,107 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Book Recommender</title>
+    <style>
+      body {
+        font-family: "Roboto", sans-serif;
+        background-color: #f0f2f5;
+        padding: 20px;
+        color: #333;
+        margin: 0;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 40px auto;
+        background-color: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        text-align: center;
+        color: #34495e;
+        margin-bottom: 30px;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      label {
+        font-weight: bold;
+        color: #2c3e50;
+      }
+
+      input {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      button {
+        padding: 12px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      button:hover {
+        background-color: #2980b9;
+      }
+
+      h2 {
+        margin-top: 40px;
+        color: #2c3e50;
+        text-align: center;
+      }
+
+      .result {
+        margin-top: 20px;
+        padding: 20px;
+        background-color: #ecf0f1;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+    </style>
   </head>
   <body>
-    <h1>Get Book Suggestions</h1>
-    <form id="suggestions-form">
-      <label for="query">Enter your query:</label>
-      <input
-        type="text"
-        id="query"
-        name="query"
-        placeholder="E.g., Recommend books similar to Harry Potter"
-        required
-      />
-      <br /><br />
-      <button type="submit">Suggerimenti</button>
-    </form>
+    <div class="container">
+      <h1>Get Book Suggestions</h1>
+      <form id="suggestions-form">
+        <label for="query">Enter your query:</label>
+        <input
+          type="text"
+          id="query"
+          name="query"
+          placeholder="E.g., Recommend books similar to Harry Potter"
+          required
+        />
+        <button type="submit">Get Suggestions</button>
+      </form>
 
-    <!-- Section to display recommendation results -->
-    <h2>Recommendation Results</h2>
-    <div id="recommendation-result"></div>
+      <h2>Recommendation Results</h2>
+      <div id="recommendation-result" class="result">No results yet</div>
+    </div>
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         const suggestionsForm = document.getElementById("suggestions-form");
 
         suggestionsForm.addEventListener("submit", function (event) {
-          event.preventDefault(); // Prevent default form submission
+          event.preventDefault();
 
           const query = document.getElementById("query").value;
 
-          // Make a POST request to the backend with the user's query
           fetch("/get_recommendations", {
             method: "POST",
             headers: {
@@ -43,7 +114,6 @@
           })
             .then((response) => response.json())
             .then((data) => {
-              // Display the recommendation result
               document.getElementById("recommendation-result").innerText =
                 data.recommendation;
             })

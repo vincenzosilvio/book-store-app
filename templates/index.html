@@ -10,220 +10,306 @@
     />
     <style>
       body {
-        font-family: Arial, sans-serif;
-        margin: 20px;
+        font-family: "Roboto", sans-serif;
+        margin: 0;
         padding: 0;
-        background-color: #f4f4f4;
+        background-color: #f0f2f5;
+        color: #333;
+      }
+
+      h1,
+      h2 {
+        text-align: center;
+        color: #34495e;
       }
 
       h1 {
-        text-align: center;
-      }
-
-      h2 {
         margin-top: 40px;
       }
 
-      form {
+      .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .actions-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         margin-bottom: 20px;
       }
 
-      label {
+      .actions-bar button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        background: linear-gradient(45deg, #6a5acd, #4caf50);
+        color: white;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+
+      .actions-bar button:hover {
+        background: linear-gradient(45deg, #4caf50, #6a5acd);
+      }
+
+      .actions-bar .logout-btn {
+        background-color: #e74c3c;
+        padding: 10px 15px;
+      }
+
+      .actions-bar .logout-btn:hover {
+        background-color: #c0392b;
+      }
+
+      form {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+      }
+
+      form label {
         font-weight: bold;
+        margin-bottom: 10px;
+      }
+
+      form input {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0 20px 0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+
+      form button {
+        background-color: #4caf50;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      form button:hover {
+        background-color: #45a049;
       }
 
       table {
         width: 100%;
         border-collapse: collapse;
         margin: 20px 0;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        background-color: white;
+        border-radius: 10px;
+        overflow: hidden;
       }
 
-      table,
-      th,
-      td {
-        border: 1px solid #ddd;
-      }
-
-      th,
-      td {
-        padding: 12px;
+      table th,
+      table td {
+        padding: 15px;
         text-align: left;
+        border-bottom: 1px solid #ddd;
       }
 
-      th {
-        background-color: #f2f2f2;
-        cursor: pointer; /* This makes the cursor a pointer when hovering over headers */
+      table th {
+        background-color: #f4f4f4;
+        cursor: pointer;
+        color: #34495e;
       }
 
-      button {
-        background-color: #4caf50;
-        color: white;
-        border: none;
+      table tr:hover {
+        background-color: #f1f1f1;
+      }
+
+      .filter-section {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+      }
+
+      .filter-section input {
+        margin-bottom: 10px;
         padding: 10px;
-        cursor: pointer;
+        width: 48%;
+        border: 1px solid #ccc;
+        border-radius: 5px;
       }
 
-      button.delete {
-        background-color: #e74c3c;
-      }
-
-      button.edit {
-        background-color: #f39c12;
-      }
-
-      #edit-book-form {
-        display: none;
-      }
-
-      .logout-btn {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        background-color: #e74c3c;
+      .filter-section button {
+        padding: 10px 20px;
+        background-color: #6a5acd;
         color: white;
         border: none;
-        padding: 10px 15px;
+        border-radius: 5px;
         cursor: pointer;
+        margin-right: 10px;
+      }
+
+      .filter-section button:hover {
+        background-color: #5a4cc7;
+      }
+
+      @media (max-width: 768px) {
+        .filter-section input {
+          width: 100%;
+        }
+
+        .actions-bar {
+          flex-direction: column;
+        }
       }
     </style>
   </head>
   <body>
     <h1>Book Store Inventory</h1>
 
-    <!-- Logout Button -->
-    <button class="logout-btn" onclick="window.location.href='/logout';">
-      Logout
-    </button>
+    <div class="container">
+      <div class="actions-bar">
+        <!-- Logout Button -->
+        <button class="logout-btn" onclick="window.location.href='/logout';">
+          Logout
+        </button>
 
-    <!-- Add Recommender Button to redirect to the new recommender page -->
-    <button
-      class="suggerimenti-btn"
-      onclick="window.location.href='/recommender';"
-    >
-      Recommender
-    </button>
+        <!-- Add Inventory Button in index.html -->
+        <button
+          class="inventory-btn"
+          onclick="window.location.href='/inventory';"
+        >
+          View Inventory
+        </button>
 
-    <h2>Add a New Book</h2>
-    <form id="add-book-form">
-      <label for="title">Title:</label>
-      <input type="text" id="title" name="title" required /><br /><br />
+        <!-- Add Recommender Button to redirect to the new recommender page -->
+        <button
+          class="suggerimenti-btn"
+          onclick="window.location.href='/recommender';"
+        >
+          Recommender
+        </button>
+      </div>
 
-      <label for="author">Author:</label>
-      <input type="text" id="author" name="author" required /><br /><br />
+      <h2>Add a New Book</h2>
+      <form id="add-book-form">
+        <label for="title">Title:</label>
+        <input type="text" id="title" name="title" required />
 
-      <label for="year_published">Year Published:</label>
+        <label for="author">Author:</label>
+        <input type="text" id="author" name="author" required />
+
+        <label for="year_published">Year Published:</label>
+        <input
+          type="number"
+          id="year_published"
+          name="year_published"
+          required
+        />
+
+        <label for="price">Price:</label>
+        <input type="number" step="0.01" id="price" name="price" required />
+
+        <button type="submit">Add Book</button>
+      </form>
+
+      <h2>Advanced Filters</h2>
+      <div class="filter-section">
+        <input
+          type="number"
+          id="year-min"
+          name="year_min"
+          placeholder="Min Year"
+        />
+        <input
+          type="number"
+          id="year-max"
+          name="year_max"
+          placeholder="Max Year"
+        />
+        <input
+          type="number"
+          id="price-min"
+          name="price_min"
+          placeholder="Min Price"
+          step="0.01"
+        />
+        <input
+          type="number"
+          id="price-max"
+          name="price_max"
+          placeholder="Max Price"
+          step="0.01"
+        />
+
+        <button type="button" onclick="applyFilters()">Apply Filters</button>
+        <button type="button" onclick="resetFilters()">Reset Filters</button>
+      </div>
+
+      <h2>Search Books</h2>
       <input
-        type="number"
-        id="year_published"
-        name="year_published"
-        required
-      /><br /><br />
-
-      <label for="price">Price:</label>
-      <input
-        type="number"
-        step="0.01"
-        id="price"
-        name="price"
-        required
-      /><br /><br />
-
-      <button type="submit">Add Book</button>
-    </form>
-
-    <h2>Edit Book</h2>
-    <form id="edit-book-form">
-      <input type="hidden" id="edit-book-id" name="id" />
-
-      <label for="edit-title">Title:</label>
-      <input type="text" id="edit-title" name="title" required /><br /><br />
-
-      <label for="edit-author">Author:</label>
-      <input type="text" id="edit-author" name="author" required /><br /><br />
-
-      <label for="edit-year_published">Year Published:</label>
-      <input
-        type="number"
-        id="edit-year_published"
-        name="year_published"
-        required
-      /><br /><br />
-
-      <label for="edit-price">Price:</label>
-      <input
-        type="number"
-        step="0.01"
-        id="edit-price"
-        name="price"
-        required
-      /><br /><br />
-
-      <button type="submit">Update Book</button>
-    </form>
-
-    <h2>Advanced Filters</h2>
-    <form id="filter-form">
-      <label for="year-min">Year Published (from):</label>
-      <input
-        type="number"
-        id="year-min"
-        name="year_min"
-        placeholder="Min Year"
+        type="text"
+        id="search-query"
+        placeholder="Search by title or author"
+        oninput="searchUserBooks()"
+        style="
+          width: 100%;
+          padding: 10px;
+          margin-bottom: 20px;
+          border-radius: 5px;
+          border: 1px solid #ccc;
+        "
       />
 
-      <label for="year-max">Year Published (to):</label>
-      <input
-        type="number"
-        id="year-max"
-        name="year_max"
-        placeholder="Max Year"
-      /><br /><br />
+      <h2>Edit Book</h2>
+      <form id="edit-book-form">
+        <input type="hidden" id="edit-book-id" name="id" />
 
-      <label for="price-min">Price (from):</label>
-      <input
-        type="number"
-        id="price-min"
-        name="price_min"
-        placeholder="Min Price"
-        step="0.01"
-      />
+        <label for="edit-title">Title:</label>
+        <input type="text" id="edit-title" name="title" required /><br /><br />
 
-      <label for="price-max">Price (to):</label>
-      <input
-        type="number"
-        id="price-max"
-        name="price_max"
-        placeholder="Max Price"
-        step="0.01"
-      /><br /><br />
+        <label for="edit-author">Author:</label>
+        <input
+          type="text"
+          id="edit-author"
+          name="author"
+          required
+        /><br /><br />
 
-      <button type="button" onclick="applyFilters()">Apply Filters</button>
-      <button type="button" onclick="resetFilters()">Reset Filters</button>
-    </form>
+        <label for="edit-year_published">Year Published:</label>
+        <input
+          type="number"
+          id="edit-year_published"
+          name="year_published"
+          required
+        /><br /><br />
 
-    <h2>Search Books</h2>
-    <input
-      type="text"
-      id="search-query"
-      placeholder="Search by title or author"
-      oninput="searchBooks()"
-    />
+        <label for="edit-price">Price:</label>
+        <input
+          type="number"
+          step="0.01"
+          id="edit-price"
+          name="price"
+          required
+        /><br /><br />
 
-    <table id="books-table">
-      <thead>
-        <tr>
-          <th onclick="sortBooks('title')">Title</th>
-          <th onclick="sortBooks('author')">Author</th>
-          <th onclick="sortBooks('year_published')">Year Published</th>
-          <th onclick="sortBooks('price')">Price</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="books-list">
-        <!-- Dynamically loaded content -->
-      </tbody>
-    </table>
+        <button type="submit">Update Book</button>
+      </form>
+
+      <table id="books-table">
+        <thead>
+          <tr>
+            <th onclick="sortUserBooks('title')">Title</th>
+            <th onclick="sortUserBooks('author')">Author</th>
+            <th onclick="sortUserBooks('year_published')">Year Published</th>
+            <th onclick="sortUserBooks('price')">Price</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="books-list">
+          <!-- Dynamically loaded content -->
+        </tbody>
+      </table>
+    </div>
 
     <script src="/static/app.js"></script>
   </body>

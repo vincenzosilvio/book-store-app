@@ -6,19 +6,22 @@ client = OpenAI(
     api_key=os.environ.get("OPENAI_API_KEY"),
 )
 
+
 # Function to fetch book description using an LLM
 def fetch_book_description(title, author):
     print(f"Fetching description for: {title} by {author}")
-    prompt = f"Provide a brief plot description for the book titled '{title}' by {author}."
-    
+    prompt = (
+        f"Provide a brief plot description for the book titled '{title}' by {author}."
+    )
+
     try:
         response = client.chat.completions.create(
             model="gpt-4o-mini",  # or "gpt-4" if you have access
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": prompt}
+                {"role": "user", "content": prompt},
             ],
-            max_tokens=300
+            max_tokens=300,
         )
         # Extracting the generated message content
         return response.choices[0].message.content

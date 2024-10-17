@@ -35,7 +35,7 @@ login_manager.init_app(app)
 login_manager.login_view = "login"
 
 
-# Tabella User
+# Tabella User registrati allo store digitale
 class User(UserMixin, db.Model):
     __tablename__ = "book_store_users"  # Use a new table name
     id = db.Column(db.Integer, primary_key=True)
@@ -49,8 +49,9 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
 
-# Tabella Book
-class Book(db.Model):
+# Tabella UserBooks che indica quali libri possiede un utente
+class UserBooks(db.Model):
+    __tablename__ = "book_users"  # Use a new table name
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False)
     author = db.Column(db.String(255), nullable=False)
@@ -59,25 +60,84 @@ class Book(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("book_store_users.id"), nullable=True)
 
 
+# Tabella dei libri raccolti dallo store digitale
+class Book(db.Model):
+    __tablename__ = "book"  # Table name
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255), nullable=False)
+    author = db.Column(db.String(255), nullable=False)
+    year_published = db.Column(db.Integer, nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    genres = db.Column(db.String(255), nullable=True)
+
+
 # Login manager user loader
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
 
+@app.route("/inventory", methods=["GET"])
+@login_required
+def inventory():
+    """Fetch and display all available books in the inventory."""
+    books = Book.query.all()  # Fetch all books from the database
+    return render_template("inventory.html", books=books)
+
+
+@app.route("/add_to_collection/<int:book_id>", methods=["POST"])
+@login_required
+def add_to_collection(book_id):
+    """Add a book to the current user's collection."""
+
+    # Check if the book exists in the inventory
+    book = Book.query.get_or_404(book_id)
+
+    # Check if the current user already has the book in their collection (UsersBooks table)
+    existing_entry = UserBooks.query.filter_by(
+        user_id=current_user.id, id=book_id
+    ).first()
+
+    if existing_entry:  # If the book is already in the user's collection
+        return jsonify({"message": "Book is already in your collection"}), 400
+
+    # Create a new entry in the UsersBooks table to link the book to the current user
+    new_entry = UserBooks(
+        user_id=current_user.id,
+        id=book_id,
+        title=book.title,
+        author=book.author,
+        year_published=book.year_published,
+        price=book.price,
+    )
+
+    try:
+        db.session.add(new_entry)
+        db.session.commit()
+        return jsonify({"message": "Book added to your collection!"}), 200
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify({"message": f"Database Error: {str(e)}"}), 500
+
+
 @app.route("/book/<int:book_id>", methods=["GET"])
 @login_required
 def book_details(book_id):
     """Fetch and display the details of a specific book."""
-    book = Book.query.get_or_404(book_id)  # Get the book or return a 404 if not found
-    description = get_bookDescription.fetch_book_description(book.title, book.author)  # Fetch description
-    return render_template("book_details.html", book=book, description=description)
+    book = UserBooks.query.get_or_404(
+        book_id
+    )  # Get the book or return a 404 if not found
+    # description = get_bookDescription.fetch_book_description(book.title, book.author)  # Fetch description
+    return render_template("book_details.html", book=book)
+
 
 @app.route("/fetch_description/<int:book_id>", methods=["GET"])
 @login_required
 def fetch_description(book_id):
     # Fetch the book from the database
-    book = Book.query.get_or_404(book_id)  # This will 404 if the book_id is invalid
+    book = UserBooks.query.get_or_404(
+        book_id
+    )  # This will 404 if the book_id is invalid
 
     # Fetch the description from the LLM using the function
     description = get_bookDescription.fetch_book_description(book.title, book.author)
@@ -104,7 +164,6 @@ def register():
     return render_template("register.html")
 
 
-# Route per il login
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -116,7 +175,7 @@ def login():
             login_user(user)
             return redirect(url_for("home"))
         else:
-            return "Invalid credentials. Please try again."
+            return jsonify({"success": False, "message": "Invalid credentials"}), 400
     return render_template("login.html")
 
 
@@ -133,47 +192,101 @@ def logout():
 @login_required
 def home():
     """Render the homepage with all books for the current user."""
-    books = Book.query.filter_by(user_id=current_user.id).all()
+    books = UserBooks.query.filter_by(user_id=current_user.id).all()
     return render_template("index.html", books=books)
 
 
 # Route per aggiungere un nuovo libro
-@app.route("/books", methods=["POST"])
+@app.route("/user_books", methods=["POST"])
 @login_required
 def add_book():
-    """Add a new book for the current user."""
+    """Add a new book for the current user and to the inventory if it doesn't exist."""
+
     try:
         data = request.get_json()
         if not data:
-            print("No data received")  # Debugging statement
-            return jsonify({"message": "No data received"}), 400
+            return jsonify({"success": False, "message": "No data received"}), 400
 
-        print("Data received:", data)  # Debugging statement
+        # Check if the book already exists in the inventory (Book table)
+        existing_book = Book.query.filter_by(
+            title=data.get("title"), author=data.get("author")
+        ).first()
 
-        # Create the new book object
-        new_book = Book(
+        if existing_book:
+            # If the book exists, use its book_id
+            book_id = existing_book.id
+            print("Book already exists in the inventory")  # Debugging statement
+        else:
+            # If the book does not exist, insert it into the Book table
+
+            print("Book does not exist in the inventory")  # Debugging statement
+            # Get the highest current book_id and increment it
+            max_book = Book.query.order_by(Book.id.desc()).first()
+            new_book_id = (
+                (max_book.id + 1) if max_book else 1
+            )  # Start at 1 if no books exist
+
+            # Create a new book entry in the Book table
+            new_book_in_inventory = Book(
+                id=new_book_id,
+                title=data.get("title"),
+                author=data.get("author"),
+                year_published=data.get("year_published"),
+                price=data.get("price"),
+                genres=data.get("genres"),  # Assuming genres are present in the request
+            )
+
+            # Add the new book to the Book table
+            db.session.add(new_book_in_inventory)
+            db.session.commit()
+
+            # Set book_id to the newly created book's ID
+            book_id = new_book_in_inventory.id
+
+        # Check if the book is already in the user's collection (UserBooks table)
+        existing_user_book = UserBooks.query.filter_by(
+            user_id=current_user.id, id=book_id
+        ).first()
+
+        if existing_user_book:
+            return (
+                jsonify(
+                    {"success": False, "message": "Book is already in your collection"}
+                ),
+                400,
+            )
+
+        # Add the book to the user's collection (UserBooks table)
+        new_user_book = UserBooks(
+            user_id=current_user.id,
+            id=book_id,
             title=data.get("title"),
             author=data.get("author"),
             year_published=data.get("year_published"),
             price=data.get("price"),
-            user_id=current_user.id,
         )
 
-        # Add and commit the book to the database
-        db.session.add(new_book)
+        # Add the new book to the UserBooks table
+        db.session.add(new_user_book)
         db.session.commit()
 
-        print("Book added successfully")  # Debugging statement
-        return jsonify({"message": "Book added successfully!"}), 201
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "message": "Book added to your collection and inventory!",
+                }
+            ),
+            201,
+        )
 
     except SQLAlchemyError as e:
         db.session.rollback()
-        print("Error occurred:", str(e))  # Debugging statement
-        return jsonify({"message": f"Database Error: {str(e)}"}), 500
+        return jsonify({"success": False, "message": f"Database Error: {str(e)}"}), 500
 
 
 # Route per ottenere tutti i libri con filtraggio e ordinamento opzionali
-@app.route("/books", methods=["GET"])
+@app.route("/user_books", methods=["GET"])
 @login_required
 def get_books():
     """Get all books for the current user with optional filtering and sorting."""
@@ -189,26 +302,28 @@ def get_books():
         sort_direction = request.args.get("sort_direction", default="asc", type=str)
 
         # Start with all books for the current user
-        books_query = Book.query.filter_by(user_id=current_user.id)
+        books_query = UserBooks.query.filter_by(user_id=current_user.id)
 
         # Apply price filters if present
         if price_min is not None:
-            books_query = books_query.filter(Book.price >= price_min)
+            books_query = books_query.filter(UserBooks.price >= price_min)
         if price_max is not None:
-            books_query = books_query.filter(Book.price <= price_max)
+            books_query = books_query.filter(UserBooks.price <= price_max)
 
         # Apply year filters if present
         if year_min is not None:
-            books_query = books_query.filter(Book.year_published >= year_min)
+            books_query = books_query.filter(UserBooks.year_published >= year_min)
         if year_max is not None:
-            books_query = books_query.filter(Book.year_published <= year_max)
+            books_query = books_query.filter(UserBooks.year_published <= year_max)
 
         # Apply sorting
         if sort_field in ["title", "author", "year_published", "price"]:
             if sort_direction == "asc":
-                books_query = books_query.order_by(getattr(Book, sort_field).asc())
+                books_query = books_query.order_by(getattr(UserBooks, sort_field).asc())
             else:
-                books_query = books_query.order_by(getattr(Book, sort_field).desc())
+                books_query = books_query.order_by(
+                    getattr(UserBooks, sort_field).desc()
+                )
 
         # Execute the query and retrieve the books
         books = books_query.all()
@@ -231,13 +346,12 @@ def get_books():
         return jsonify({"message": f"Database Error: {str(e)}"}), 500
 
 
-
 # Route per modificare un libro esistente
-@app.route("/books/<int:book_id>", methods=["PUT"])
+@app.route("/user_books/<int:book_id>", methods=["PUT"])
 @login_required
 def update_book(book_id):
     """Update an existing book."""
-    book = Book.query.get(book_id)
+    book = UserBooks.query.get(book_id)
     if book is None:
         return jsonify({"message": "Book not found"}), 404
 
@@ -260,11 +374,11 @@ def update_book(book_id):
 
 
 # Route to delete a book
-@app.route("/books/<int:book_id>", methods=["DELETE"])
+@app.route("/user_books/<int:book_id>", methods=["DELETE"])
 @login_required
 def delete_book(book_id):
     """Delete a book by its ID."""
-    book = Book.query.get(book_id)
+    book = UserBooks.query.get(book_id)
     if book is None:
         return jsonify({"message": "Book not found"}), 404
 

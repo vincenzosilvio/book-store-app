@@ -10,7 +10,7 @@ client = OpenAI(
 # Function to fetch book description using an LLM
 def fetch_book_description(title, author):
 
-    print(title,author)
+    print(title, author)
     prompt = (
         f"Provide a brief plot description for the book titled '{title}' by {author}."
     )
@@ -20,9 +20,9 @@ def fetch_book_description(title, author):
             model="gpt-4o-mini",  # or "gpt-4" if you have access
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": prompt}
+                {"role": "user", "content": prompt},
             ],
-            max_tokens=300
+            max_tokens=300,
         )
         return response.choices[0].message.content
     except Exception as e:
