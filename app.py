@@ -127,7 +127,6 @@ def book_details(book_id):
     book = UserBooks.query.get_or_404(
         book_id
     )  # Get the book or return a 404 if not found
-    # description = get_bookDescription.fetch_book_description(book.title, book.author)  # Fetch description
     return render_template("book_details.html", book=book)
 
 #Route per la ottenere la descrizione da inserire in book_details.html

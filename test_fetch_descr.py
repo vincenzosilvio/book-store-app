@@ -1,9 +1,9 @@
-from fetch_descr import fetch_book_description
+from get_bookDescription import fetch_book_description
 from unittest.mock import patch, MagicMock
 
 
-# Mock the API call in 'fetch_descr' that fetches book descriptions
-@patch("fetch_descr.client.chat.completions.create")
+# Mock the API call that fetches book descriptions
+@patch("get_bookDescription.client.chat.completions.create")
 def test_fetch_book_description(mock_completion):
     # Set up the mock object
     mock_response = MagicMock()

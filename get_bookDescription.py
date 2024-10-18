@@ -7,7 +7,7 @@ client = OpenAI(
 )
 
 
-# Function to fetch book description using an LLM
+# Function to fetch book description using gpt-4o-mini model
 def fetch_book_description(title, author):
 
     print(title, author)

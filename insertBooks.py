@@ -2,15 +2,13 @@ import pandas as pd
 import random
 from sqlalchemy import create_engine
 
-# Some comments here
+#Script that adds 100 books to the book database
 
-# Load the CSV file
-df = pd.read_csv("books.csv")  # Adjust the path if needed
+# Load books data from CSV
+df = pd.read_csv("books.csv")  
 
 # Rename columns to match the database schema
-books_data = df[["Book", "Author", "Genres"]].head(
-    100
-)  # Use relevant columns from the CSV
+books_data = df[["Book", "Author", "Genres"]].head(100)  
 books_data.columns = ["title", "author", "genres"]  # Rename columns
 
 # Add year_published and price columns
