@@ -1,15 +1,52 @@
-name: Python application test with Github Actions using devcontainers
-on: [push]
+name: CI Workflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
 jobs:
-  build:
+  test:
+    name: Run Tests and Code Quality Checks
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v2
-    - name: test build-Build and run dev container task
-      uses: devcontainers/ci@v0.2
-      with:
-        runCmd: |
-          make install
-          make lint
-          make test
-          make format
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'  # Specify the version of Python to use
+
+      # Install dependencies
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Run pytest to test the Python project
+      - name: Run pytest
+        run: |
+          pytest
+
+      # Set up Node.js for Prettier
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'  # Specify the version of Node.js
+
+      # Install Prettier
+      - name: Install Prettier
+        run: npm install -g prettier
+
+      # Run Prettier to check code formatting
+      - name: Run Prettier for code formatting
+        run: |
+          prettier --check "templates/*.html"
+
