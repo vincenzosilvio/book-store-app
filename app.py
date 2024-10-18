@@ -37,7 +37,7 @@ login_manager.login_view = "login"
 
 # Tabella User registrati allo store digitale
 class User(UserMixin, db.Model):
-    __tablename__ = "book_store_users"  # Use a new table name
+    __tablename__ = "book_store_users"  
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
@@ -51,7 +51,7 @@ class User(UserMixin, db.Model):
 
 # Tabella UserBooks che indica quali libri possiede un utente
 class UserBooks(db.Model):
-    __tablename__ = "book_users"  # Use a new table name
+    __tablename__ = "book_users"  
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False)
     author = db.Column(db.String(255), nullable=False)
@@ -76,15 +76,15 @@ class Book(db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-
+#Route per la pagina dell'inventario
 @app.route("/inventory", methods=["GET"])
 @login_required
 def inventory():
     """Fetch and display all available books in the inventory."""
-    books = Book.query.all()  # Fetch all books from the database
+    books = Book.query.all() # Get all books from the Book table
     return render_template("inventory.html", books=books)
 
-
+#Route per aggiungere un libro alla collezione dell'utente
 @app.route("/add_to_collection/<int:book_id>", methods=["POST"])
 @login_required
 def add_to_collection(book_id):
@@ -119,7 +119,7 @@ def add_to_collection(book_id):
         db.session.rollback()
         return jsonify({"message": f"Database Error: {str(e)}"}), 500
 
-
+#Route per la pagina dei dettagli di un libro
 @app.route("/book/<int:book_id>", methods=["GET"])
 @login_required
 def book_details(book_id):
@@ -130,7 +130,7 @@ def book_details(book_id):
     # description = get_bookDescription.fetch_book_description(book.title, book.author)  # Fetch description
     return render_template("book_details.html", book=book)
 
-
+#Route per la ottenere la descrizione da inserire in book_details.html
 @app.route("/fetch_description/<int:book_id>", methods=["GET"])
 @login_required
 def fetch_description(book_id):
@@ -146,7 +146,7 @@ def fetch_description(book_id):
     return jsonify({"description": description})
 
 
-# Route per la registrazione
+# Route per la registrazione di un nuovo utente
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -163,7 +163,7 @@ def register():
         return redirect(url_for("login"))
     return render_template("register.html")
 
-
+#Route per la pagina di login
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -187,7 +187,7 @@ def logout():
     return redirect(url_for("login"))
 
 
-# Route per la pagina principale
+# Route per il menù principale
 @app.route("/")
 @login_required
 def home():
@@ -285,7 +285,7 @@ def add_book():
         return jsonify({"success": False, "message": f"Database Error: {str(e)}"}), 500
 
 
-# Route per ottenere tutti i libri con filtraggio e ordinamento opzionali
+# Route per ottenere tutti i libri di un utente con filtraggio e ordinamento opzionali
 @app.route("/user_books", methods=["GET"])
 @login_required
 def get_books():
@@ -373,7 +373,7 @@ def update_book(book_id):
         return jsonify({"message": f"Database Error: {str(e)}"}), 500
 
 
-# Route to delete a book
+# Route per eliminare un libro
 @app.route("/user_books/<int:book_id>", methods=["DELETE"])
 @login_required
 def delete_book(book_id):
@@ -396,36 +396,13 @@ def delete_book(book_id):
         return jsonify({"message": f"Database Error: {str(e)}"}), 500
 
 
-# Route for get recommdender.html
+# Route per caricare la pagina delle raccomandazioni
 @app.route("/recommender", methods=["GET"])
 @login_required
 def recommender_page():
     return render_template("recommender.html")
 
-
-# Route for recommendations
-@app.route("/recommender", methods=["POST"])
-@login_required
-def recommender():
-    try:
-        # Get the query from the frontend
-        data = request.get_json()
-        query = data.get("query", "")
-
-        if not query:
-            return jsonify({"message": "Query not provided"}), 400
-
-        # Run the RAG system and get recommendations
-        recommendations = rag.get_book_recommendations(query)
-
-        # Return the recommendation as a JSON response
-        return jsonify({"recommendation": recommendations})
-
-    except Exception as e:
-        print("Error during recommendation:", str(e))
-        return jsonify({"message": "Error occurred during recommendation"}), 500
-
-
+#Route per ottenere le raccomandazioni di libri
 @app.route("/get_recommendations", methods=["POST"])
 @login_required
 def get_recommendations():
