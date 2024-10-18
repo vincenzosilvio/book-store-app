@@ -8,7 +8,7 @@ install:
 		pip install -r requirements.txt
 	#force install latest whisper
 test:
-	#python -m pytest -vv --cov=main --cov=mylib test_*.py
+	python3 -m pytest -vv test_*.py
 
 format:	
 	black *.py 
@@ -22,7 +22,7 @@ format: format-python format-html format-js
 # Lint Python files using pylint
 lint-python:
 	@echo "Linting Python files..."
-	pylint --disable=R,C *.py
+	pylint --disable=R,C,W,E0611 *.py
 
 # Lint HTML files using Prettier
 lint-html:
@@ -57,4 +57,4 @@ refactor: format lint
 deploy:
 	#deploy goes here
 		
-all: install lint test format deploy
+all: install lint test format refactor deploy

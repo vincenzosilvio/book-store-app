@@ -1,0 +1,22 @@
+{
+  "name": "lint",
+  "version": "1.0.0",
+  "description": "sudo apt-get update\r sudo apt-get install postgresql postgresql-contrib\r sudo service postgresql start\r sudo -u postgres psql\r #To run make lint-js/html\r sudo apt install nodejs\r sudo apt install npm",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vincenzosilvio/book-store-app.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vincenzosilvio/book-store-app/issues"
+  },
+  "homepage": "https://github.com/vincenzosilvio/book-store-app#readme",
+  "devDependencies": {
+    "prettier": "^3.3.3"
+  }
+}
