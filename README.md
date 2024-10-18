@@ -71,3 +71,6 @@
     
     make lint-js make lint-html make lint python or make lint
 
+    Run code
+    python app.py
+
