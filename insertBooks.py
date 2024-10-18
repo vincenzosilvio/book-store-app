@@ -2,6 +2,8 @@ import pandas as pd
 import random
 from sqlalchemy import create_engine
 
+# Some comments here
+
 # Load the CSV file
 df = pd.read_csv("books.csv")  # Adjust the path if needed
 
