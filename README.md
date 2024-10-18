@@ -21,121 +21,53 @@
     PostgreSQL Installation
     To install and set up PostgreSQL, use the following commands:
 
-''' bash
     sudo apt-get update
     sudo apt-get install postgresql postgresql-contrib
     sudo service postgresql start
     sudo -u postgres psql
-'''
+    
     After accessing PostgreSQL, run the following commands to create and configure the database:
 
-Create the database:
-sql
-Copia codice
-CREATE DATABASE book_store;
-Grant privileges to the user:
-sql
-Copia codice
-GRANT ALL PRIVILEGES ON DATABASE book_store TO user_name;
-To access the book_store database:
+    Create the database:
+    CREATE DATABASE book_store;
+    Grant privileges to the user:
+    GRANT ALL PRIVILEGES ON DATABASE book_store TO user_name;
+    
+    To access the book_store database:
+    psql -U user_name -d book_store
+    Flask Application Setup
+    
+    Clone the repository:
+    git clone https://github.com/yourusername/bookstore-app.git
+    cd bookstore-app
+    
+    Install Dependencies: Make sure you have Python installed. Then install the required packages by running: 
+    pip install -r requirements.txt (or make install)
+    
+    Install Node.js and NPM for linting HTML/JS:
+    sudo apt install nodejs
+    sudo apt install npm
+    
+    Set Up Environment Variables: You'll need to add your environment variables, including the OpenAI API key, to run the app. You can add them to .env:
+    OPENAI_API_KEY=your_openai_api_key
+    DATABASE_URL=your_database_url
+    
+    Initialize the Database Migrations: Initialize Flask migrations for the database and apply migrations:
+    
+    
+    flask db init
+    flask db migrate -m "updating Book table"
+    flask db upgrade
+    
+    Run the Application: Start the Flask development server:
+        
+    flask run
+    The app will be available at http://localhost:5000.
 
-bash
-Copia codice
-psql -U vincenzo -d book_store
-Flask Application Setup
-Clone the repository:
+    Run Tests: To run the unit tests:
+    make test
 
-bash
-Copia codice
-git clone https://github.com/yourusername/bookstore-app.git
-cd bookstore-app
-Install Dependencies: Make sure you have Python installed. Then install the required packages by running:
+    To lint your JavaScript and HTML files, use the following command:
+    
+    make lint-js make lint-html make lint python or make lint
 
-bash
-Copia codice
-pip install -r requirements.txt
-Install Node.js and NPM for linting HTML/JS:
-
-bash
-Copia codice
-sudo apt install nodejs
-sudo apt install npm
-Set Up Environment Variables: You'll need to add your environment variables, including the OpenAI API key, to run the app. You can add them to .env:
-
-makefile
-Copia codice
-OPENAI_API_KEY=your_openai_api_key
-DATABASE_URL=your_database_url
-Initialize the Database Migrations: Initialize Flask migrations for the database and apply migrations:
-
-bash
-Copia codice
-flask db init
-flask db migrate -m "updating Book table"
-flask db upgrade
-Run the Application: Start the Flask development server:
-
-bash
-Copia codice
-flask run
-The app will be available at http://localhost:5000.
-
-Run Tests: To run the unit tests:
-
-bash
-Copia codice
-pytest
-Database Management
-Delete rows from a table:
-
-sql
-Copia codice
-DELETE FROM nome_tabella;
-Drop a table:
-
-sql
-Copia codice
-DROP TABLE IF EXISTS BOOK;
-Linting JavaScript/HTML Files
-To lint your JavaScript and HTML files, use the following command:
-
-bash
-Copia codice
-make lint-js/html
-API Endpoints
-CRUD Operations
-GET /books: Get all books in the collection.
-POST /books: Add a new book to the collection.
-PUT /book/<book_id>: Update a book's details.
-DELETE /book/<book_id>: Delete a book from the collection.
-AI-based Recommender System
-GET /recommend_books: Get AI-based book recommendations.
-POST /fetch_description: Retrieve the description of a specific book.
-File Structure
-app.py: Main application file that defines routes and handles logic.
-fetch_descr.py: Fetches descriptions for books.
-get_bookDescription.py: Handles logic for retrieving detailed book descriptions from a source.
-insertBooks.py: Script to insert book records into the database.
-rag.py: Handles the retrieval-augmented generation system for book recommendations.
-test_app.py: Unit tests for app.py.
-test_fetch_descr.py: Unit tests for fetch_descr.py.
-test_insert_books.py: Unit tests for insertBooks.py.
-Requirements
-The project relies on the following packages, listed in requirements.txt:
-
-bash
-Copia codice
-psycopg2-binary
-flask
-flask-login
-flask_sqlalchemy
-flask_migrate
-transformers
-pytest
-pandas
-langchain_community
-langchain_openai
-faiss-cpu
-black
-pylint
-openai
