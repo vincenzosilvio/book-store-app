@@ -10,7 +10,8 @@
     AI-powered Recommender System: Based on book metadata and user queries, the system suggests books using a custom Retrieval-Augmented Generation (RAG) system.
     SQL Database Integration: The app uses Flask SQLAlchemy and PostgreSQL to store book data.
     Test Suite: The project includes a set of unit tests to ensure functionality.
-    Technologies Used
+    
+### Technologies Used
     Flask: Web framework used to build the backend for CRUD operations and serving HTML templates.
     FAISS: Used for similarity-based book retrieval.
     OpenAI API: Integrated for generating book recommendations based on descriptions and user queries.
